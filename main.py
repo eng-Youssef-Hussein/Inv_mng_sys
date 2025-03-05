@@ -485,7 +485,10 @@ def items_window():
 
 
     items_list.bind('<ButtonRelease-1>',select_record)
+
+
     database_query()
+    
     item_toplevel_window.mainloop()
 
 
@@ -965,11 +968,22 @@ def print_records_button():
     rows = []
     for row in sales_list.get_children():
         rows.append(sales_list.item(row)['values'])
-    # [2] add client with item
-    # [3] delete all rows
-    # [4] edit the quantity of item was sold from the item page
-    # [5] create pdf file for reciept to print it 
-    pass
+    # [2] create the connection to the database
+    sales_connection = sqlite3.connect('inventoryDB.db')
+    sales_cursor = sales_connection.cursor()
+    # [3] insert the values to the sales table
+    for row in rows:
+        sales_cursor.execute("""
+            INSERT INTO sales (barcode, client_name, phone_number, total_price, paid, discount, quantity)
+            VALUES (?,?,?,?,?,?,?)
+        """, (row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
+    sales_connection.commit()
+    sales_connection.close()
+    # [4] delete all rows from the sales list
+    x = sales_list.selection()
+    for selected in x:
+        sales_list.delete(selected)
+    
 
 
 
